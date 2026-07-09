@@ -115,3 +115,12 @@ public abstract class ItemDecoration {
 #### EventBus总线
 
 EventBus 是一个发布-订阅模式的事件总线库，用于简化 Android 组件间通信
+
+#### Handler
+```java
+mHandler.removeMessages(MSG_REQUEST);
+mHandler.obtainMessage(MSG_REQUEST).sendToTarget();
+```
+先把队列里还没执行的同类任务删掉，再重新投递一个最新任务
+这样做的好处是防抖 / 合并重复请求。比如短时间内多次调用，最终只保留最后一次请求任务，避免状态栏重复请求
+
