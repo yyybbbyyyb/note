@@ -114,7 +114,30 @@ public abstract class ItemDecoration {
 
 #### EventBus总线
 
-EventBus 是一个发布-订阅模式的事件总线库，用于简化 Android 组件间通信
+EventBus 是三方库 greenrobot EventBus(一个非常流行的 Android/Java 事件发布-订阅库)，是一个发布-订阅模式的事件总线库，用于简化 Android 组件间通信
+
+三要素：
++ Event：普通 Java 对象（POJO），只当数据信封，不需继承任何类
++ Subscriber：用 @Subscribe 注解的方法，靠参数类型匹配事件（方法名随便起）
++ Poster：eventBus.post(new XxxEvent()) 发布事件
+
+常用注解：
++ @Subscribe(threadMode = ThreadMode.MAIN) → 回调保证在主线程（可安全操作 UI），还可以设置优先级：priority = 1
++ 其他模式：POSTING(发布线程) / BACKGROUND / ASYNC
++ @SuppressWarnings("unused") → 因为方法是反射调用的，加它免"未被使用"警告
+
+注册/反注册（必须配对！）：
+```java
+onResume → EventBus.register(this)     // 注册：反射扫描 @Subscribe 方法建映射表
+onDestroy → EventBus.unregister(this)  // 反注册：否则强引用导致内存泄漏 + 崩溃
+```
+
+
+
+
+
+
+
 
 #### Handler
 ```java
@@ -123,4 +146,27 @@ mHandler.obtainMessage(MSG_REQUEST).sendToTarget();
 ```
 先把队列里还没执行的同类任务删掉，再重新投递一个最新任务
 这样做的好处是防抖 / 合并重复请求。比如短时间内多次调用，最终只保留最后一次请求任务，避免状态栏重复请求
+
+
+#### SimpleArrayMap
+
+|      | HashMap             | SimpleArrayMap                               |
+| ---- | ------------------- | -------------------------------------------- |
+| 底层结构 | 数组 + 链表/红黑树（真正哈希表）  | 两个平行数组（一个存 key，一个存 value）                    |
+| 查找方式 | 计算 hash → 定位桶       | 计算 hash → <br>在 key 数组里线性遍历找相同 hash 和 equals |
+| 内存开销 | 大（有 Node 对象、桶数组有冗余） | 小（没有额外包装对象）                                  |
+| 适合场景 | 元素多、频繁增删查           | 元素少（几十个以内）                                   |
+SimpleArrayMap 就是 Android 打造的"省内存版的 HashMap"，专门为元素少的场景优化，避免 HashMap 在 TV 这种内存敏感设备上产生过多对象。
+
+
+
+
+
+
+
+
+
+
+
+
 
